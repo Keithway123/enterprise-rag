@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   etcd:
     # 文员：存 schema、checkpoint 这类"账本"信息，要求强一致性
