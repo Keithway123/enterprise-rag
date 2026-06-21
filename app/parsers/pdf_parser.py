@@ -142,7 +142,7 @@ def _parse_ocr(file_path: str) -> dict:
     for page_number,image in enumerate(images,start=1):
         page_text = pytesseract.image_to_string(image,lang="chi_sim")
 
-        if not page_text.strip():
+        if not page_text.strip():  #strip()先把首尾空白都清掉,在判断"是不是空的".
             continue
 
         pages_content.append({"page":page_number,"text":page_text})
