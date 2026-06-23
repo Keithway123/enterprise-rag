@@ -48,6 +48,22 @@ def chunk_text(text: str, chunk_size: int, overlap: int) -> list[str]:
 
     return chunks
 
+def chunk_table(table_data:list[list], rows_per_chunk:int) -> list[list[list]]:
+    chunks = []
+    start_row = 0
+
+    while start_row < len(table_data):
+        endrow = start_row + rows_per_chunk
+        chunk = table_data[start_row:endrow]
+        if start_row == 0:
+            chunks.append(chunk)
+        else:
+            chunk_with_header = [table_data[0]] + chunk 
+            chunks.append(chunk_with_header)
+        start_row = endrow
+
+    return chunks
+
 
 if __name__ == "__main__":
     # 用一段简单、可预测的文本测试，方便你肉眼数清楚每块的内容对不对
