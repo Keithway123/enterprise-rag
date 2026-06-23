@@ -1,13 +1,13 @@
 from pymilvus import MilvusClient,DataType
 
 from app.parsers.pdf_parser import parse_pdf
-from app.chunking import chunk_text
+from app.chunking import chunk_text,chunk_table
 from app.embedding import get_embedding
 
 COLLECTION_NAME ="enterprise_docs"
 print("ingest_document - 开始执行")
 
-def ingest_document(file_path:str , parse_mode:str , chunk_size:int = 500 , overlap:int =50):
+def ingest_document(file_path:str , parse_mode:str , chunk_size:int = 500 , overlap:int =50,rows_per_chunk:int =50):
     print("ingest_document 函数已经被调用，参数是:", file_path, parse_mode)
 
     client = MilvusClient(uri="http://localhost:19530")
@@ -46,16 +46,17 @@ def ingest_document(file_path:str , parse_mode:str , chunk_size:int = 500 , over
                     "mode":parse_mode,
                 })
         elif item_type =="table":
-            table_text = "\n".join([" ".join(row) for row in item["data"]])
-            #table_text = chunk_table(table_text,rows_per_chunk=10)
-            vector = get_embedding(table_text)
-            data_to_insert.append({
-                "vector":vector,
-                "text":table_text,
-                "source":file_path,
-                "page":page_number,
-                "mode":parse_mode,
-            })
+            table_chunks = chunk_table(item["data"],rows_per_chunk=rows_per_chunk)
+            for table_chunk in table_chunks:
+                table_text = "\n".join([" ".join(row) for row in table_chunk])
+                vector = get_embedding(table_text)
+                data_to_insert.append({
+                    "vector":vector,
+                    "text":table_text,
+                    "source":file_path,
+                    "page":page_number,
+                    "mode":parse_mode,
+                })
 
     if data_to_insert:
         result = client.insert(collection_name=COLLECTION_NAME,data=data_to_insert)
