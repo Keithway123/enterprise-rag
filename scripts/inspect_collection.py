@@ -1,0 +1,28 @@
+"""
+查询脚本：验证刚写入 Milvus 的数据，长什么样。
+
+用 query()（按条件筛选）而不是 search()（按向量相似度检索）——
+这次只是想看"数据库里现在有什么"，不是做相似度搜索。
+"""
+
+from pymilvus import MilvusClient
+
+client = MilvusClient(uri="http://localhost:19530")
+
+results = client.query(
+    collection_name="enterprise_docs",
+    filter="id >= 0",  # 一个永远成立的条件，相当于"把所有记录都查出来"
+    output_fields=["id", "text", "source", "page", "mode"],  # 不要 output_fields=["*"]，
+    # 向量本身有 1024 个数字，打印出来会刷屏，这次不需要看它
+)
+
+print(f"共查到 {len(results)} 条记录\n")
+
+for i, record in enumerate(results, start=1):
+    print(f"--- 第 {i} 条 ---")
+    print(f"id: {record['id']}")
+    print(f"source: {record['source']}")
+    print(f"page: {record['page']}")
+    print(f"mode: {record['mode']}")
+    print(f"text: {record['text']}")
+    print()
