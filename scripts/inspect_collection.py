@@ -11,8 +11,9 @@ client = MilvusClient(uri="http://localhost:19530")
 
 results = client.query(
     collection_name="enterprise_docs",
-    filter="id >= 0",  # 一个永远成立的条件，相当于"把所有记录都查出来"
+    filter="",  # 一个永远成立的条件，相当于"把所有记录都查出来",>=0会限制字段为int，""就不限制字段
     output_fields=["id", "text", "source", "page", "mode"],  # 不要 output_fields=["*"]，
+    limit=1000,
     # 向量本身有 1024 个数字，打印出来会刷屏，这次不需要看它
 )
 
