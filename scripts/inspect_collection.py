@@ -11,8 +11,9 @@ client = MilvusClient(uri="http://localhost:19530")
 
 results = client.query(
     collection_name="enterprise_docs",
-    filter="id >= 0",  # 一个永远成立的条件，相当于"把所有记录都查出来"
-    output_fields=["id", "text", "source", "page", "mode"],  # 不要 output_fields=["*"]，
+    filter="",  # 一个永远成立的条件，相当于"把所有记录都查出来",>=0会限制字段为int，""就不限制字段
+    output_fields=["id", "text", "source", "page","table_index","table_chunk_index","mode"],  # 不要 output_fields=["*"]，
+    limit=1000,
     # 向量本身有 1024 个数字，打印出来会刷屏，这次不需要看它
 )
 
@@ -23,6 +24,8 @@ for i, record in enumerate(results, start=1):
     print(f"id: {record['id']}")
     print(f"source: {record['source']}")
     print(f"page: {record['page']}")
+    print(f"table_index: {record.get('table_index')}")
+    print(f"table_chunk_index: {record.get('table_chunk_index')}")
     print(f"mode: {record['mode']}")
     print(f"text: {record['text']}")
     print()
