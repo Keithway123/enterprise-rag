@@ -91,8 +91,9 @@ def ingest_document(
                 })
  
         elif item_type == "table":
+            table_index = item["table_index"]
             table_chunks = chunk_table(item["data"], rows_per_chunk=rows_per_chunk)
-            for table_chunk in table_chunks:
+            for table_chunk_index,table_chunk in enumerate(table_chunks,start=1):
                 table_text = "\n".join([" ".join(row) for row in table_chunk])
                 vector = get_embedding(table_text)
                 data_to_insert.append({
@@ -100,6 +101,8 @@ def ingest_document(
                     "text": table_text,
                     "source": file_path,
                     "page": page_number,
+                    "table_index":table_index,
+                    "table_chunk_index":table_chunk_index,
                     "mode": parse_mode,
                     "file_hash": file_hash,
                 })
