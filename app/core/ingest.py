@@ -17,6 +17,7 @@ ingest.py — 建库模块
 """
  
 import hashlib
+import json
  
 from app.parsers.pdf_parser import parse_pdf
 from app.chunking import chunk_text, chunk_table
@@ -95,6 +96,7 @@ def ingest_document(
             table_chunks = chunk_table(item["data"], rows_per_chunk=rows_per_chunk)
             for table_chunk_index,table_chunk in enumerate(table_chunks,start=1):
                 table_text = "\n".join([" ".join(row) for row in table_chunk])
+                table_data_json = json.dumps(table_chunk,ensure_ascii=False)
                 vector = get_embedding(table_text)
                 data_to_insert.append({
                     "vector": vector,
@@ -103,6 +105,7 @@ def ingest_document(
                     "page": page_number,
                     "table_index":table_index,
                     "table_chunk_index":table_chunk_index,
+                    "table_data_json":table_data_json,
                     "mode": parse_mode,
                     "file_hash": file_hash,
                 })
