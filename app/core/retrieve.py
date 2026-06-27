@@ -53,20 +53,19 @@ def reorder_table_chunks(table_results:list[dict])->list[dict]:
     return final_result
 
 def format_table_as_markdown(table_chunks:list[dict]) ->str:
-    header = None
+    header = json.loads(table_chunks[0]["table_data_json"])[0]
     all_rows = [] 
     
+    #获取数据行
     for chunk in table_chunks:
         table_data = json.loads(chunk["table_data_json"])
-        
-        if chunk["table_chunk_index"] == 1:
-            header = table_data[0]#['姓名', '部门', '入职日期'] list->三个元素
         all_rows.extend(table_data[1:])
-    
+
+   
     #表头
     header_line = "|" + "|".join(header) + "|"
 
-    #分隔符行 separ
+    #分隔符行 separator_line
     separator_line = "|" + "|".join(["---"]*len(header)) + "|"
 
     row_lines = []
@@ -74,6 +73,7 @@ def format_table_as_markdown(table_chunks:list[dict]) ->str:
         row_line = "|" + "|".join(row) + "|"
         row_lines.append(row_line)
 
+    #list + list
     markdown_table ="\n".join([header_line,separator_line] + row_lines)
 
     return markdown_table
