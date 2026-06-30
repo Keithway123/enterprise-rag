@@ -34,6 +34,13 @@ def chunk_text(text: str, chunk_size: int, overlap: int) -> list[str]:
     思考第二步：循环什么时候停止？当"下一块的起始位置"已经
     超出了 text 的总长度时，应该怎么处理？
     """
+    if chunk_size <= 0:
+        raise ValueError("chunk_size 必须大于 0")
+    if overlap < 0:
+        raise ValueError("overlap 不能是负数")
+    if overlap >= chunk_size:
+        raise ValueError("overlap 必须小于 chunk_size，否则下一块不会向前推进")
+
     chunks = []
     start = 0  # 当前块的起始位置，从 0 开始
 
@@ -49,6 +56,9 @@ def chunk_text(text: str, chunk_size: int, overlap: int) -> list[str]:
     return chunks
 
 def chunk_table(table_data:list[list], rows_per_chunk:int) -> list[list[list]]:
+    if rows_per_chunk <= 0:
+        raise ValueError("rows_per_chunk 必须大于 0")
+
     chunks = []
     start_row = 0
 
