@@ -101,7 +101,7 @@ def _parse_table(file_path: str) -> dict:
 
 
             for table_index, table in enumerate(tables, start=1):
-                table_data = table.extract()
+                table_data = table.extract()    #提取表格内容
                 table_bboxes.append(table.bbox) #将当前表格的位置保存下来
 
                 content.append({
