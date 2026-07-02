@@ -59,18 +59,23 @@ def chunk_table(table_data:list[list], rows_per_chunk:int) -> list[list[list]]:
     if rows_per_chunk <= 0:
         raise ValueError("rows_per_chunk 必须大于 0")
 
+    if not table_data:
+        return []
+
+    header = table_data[0]
+    data_rows = table_data[1:]
+
+    if not data_rows:
+        return []
+
     chunks = []
     start_row = 0
 
-    while start_row < len(table_data):
-        endrow = start_row + rows_per_chunk
-        chunk = table_data[start_row:endrow]
-        if start_row == 0:
-            chunks.append(chunk)
-        else:
-            chunk_with_header = [table_data[0]] + chunk 
-            chunks.append(chunk_with_header)
-        start_row = endrow
+    while start_row < len(data_rows):
+        end_row = start_row + rows_per_chunk
+        chunk_rows = data_rows[start_row:end_row]
+        chunks.append([header] + chunk_rows)
+        start_row = end_row
 
     return chunks
 

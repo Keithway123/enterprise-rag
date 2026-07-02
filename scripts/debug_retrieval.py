@@ -38,9 +38,12 @@ def main() -> None:
         print("如果刚启动容器，请等几秒再重试这个脚本。")
         raise SystemExit(1)
 
-    print("=== 用户问题 ===")
-    print(debug_info["query"])
-    print()
+    parser.add_argument("--show-query", action="store_true", help="是否单独打印用户问题")
+
+    if args.show_query:
+        print("=== 用户问题 ===")
+        print(debug_info["query"])
+        print()
 
     print("=== Top-k 召回调试信息 ===")
     print(debug_info["retrieval_trace"] or "没有召回结果")

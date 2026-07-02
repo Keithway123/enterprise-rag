@@ -37,17 +37,28 @@ class ChunkTextTests(unittest.TestCase):
 class ChunkTableTests(unittest.TestCase):
     def test_chunk_table_adds_header_to_later_chunks(self):
         table = [
-            ["姓名", "部门"],
-            ["张三", "研发部"],
-            ["李四", "市场部"],
-            ["王五", "财务部"],
+            ["name", "department"],
+            ["zhangsan", "tech"],
+            ["lisi", "marketing"],
+            ["wangwu", "finance"],
         ]
 
         chunks = chunk_table(table, rows_per_chunk=2)
 
-        self.assertEqual(chunks[0], [["姓名", "部门"], ["张三", "研发部"]])
-        self.assertEqual(chunks[1][0], ["姓名", "部门"])
-        self.assertEqual(chunks[1][1:], [["李四", "市场部"], ["王五", "财务部"]])
+        self.assertEqual(chunks[0], [["name", "department"], ["zhangsan", "tech"], ["lisi", "marketing"]])
+        self.assertEqual(chunks[1], [["name", "department"], ["wangwu", "finance"]])
+
+    def test_chunk_table_does_not_create_header_only_chunk(self):
+        table = [
+            ["name", "department"],
+            ["zhangsan", "tech"],
+            ["lisi", "marketing"],
+        ]
+
+        chunks = chunk_table(table, rows_per_chunk=1)
+
+        self.assertEqual(chunks[0], [["name", "department"], ["zhangsan", "tech"]])
+        self.assertEqual(chunks[1], [["name", "department"], ["lisi", "marketing"]])
 
     def test_chunk_table_empty_table_returns_empty_list(self):
         self.assertEqual(chunk_table([], rows_per_chunk=3), [])
