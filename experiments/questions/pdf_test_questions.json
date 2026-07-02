@@ -1,0 +1,33 @@
+{
+  "dataset": "data/raw/test_table.pdf",
+  "questions": [
+    {
+      "id": "Q1",
+      "question": "张三在哪个部门？",
+      "expected_evidence": "张三 技术部",
+      "expected_source": "data/raw/test_table.pdf",
+      "notes": "测表格行召回"
+    },
+    {
+      "id": "Q2",
+      "question": "李四的入职日期是什么？",
+      "expected_evidence": "李四 2023-03-20",
+      "expected_source": "data/raw/test_table.pdf",
+      "notes": "测同一行列绑定"
+    },
+    {
+      "id": "Q3",
+      "question": "这份文档的数据是否代表真实人员信息？",
+      "expected_evidence": "测试用途，不代表真实人员信息",
+      "expected_source": "data/raw/test_table.pdf",
+      "notes": "测表格后说明文字"
+    },
+    {
+      "id": "Q4",
+      "question": "王五的直属主管是谁？",
+      "expected_evidence": "找不到答案依据",
+      "expected_source": "data/raw/test_table.pdf",
+      "notes": "测无依据时是否拒答"
+    }
+  ]
+}
