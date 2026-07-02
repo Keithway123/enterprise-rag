@@ -93,17 +93,25 @@ def _parse_table(file_path: str) -> dict:
 
     with pdfplumber.open(file_path) as pdf:
         for page_number, page in enumerate(pdf.pages, start=1):
-            tables = page.extract_tables()
+            #tables = page.extract_tables() #重复表格和文本的内容
+            #用bbox形式更改
+            # 每一页的 bbox 只能用于这一页，不能跨页复用
+            table_bboxes = []            
+            tables = page.find_tables() # find_tables() 返回表格对象，既能取数据，也能取 bbox
+
 
             for table_index, table in enumerate(tables, start=1):
+                table_data = table.extract()
+                table_bboxes.append(table.bbox) #将当前表格的位置保存下来
+
                 content.append({
                     "page": page_number,
                     "type": "table",
                     "table_index": table_index,
-                    "data": table,
+                    "data": table_data,
                 })
 
-            page_text = page.extract_text()
+            page_text = _extract_text_outside_tables(page, table_bboxes)
             if page_text is not None:
                 content.append({
                     "page": page_number,
@@ -120,6 +128,47 @@ def _parse_table(file_path: str) -> dict:
         "source": file_path,
     }
 
+def _overlaps_bbox(obj:dict, bbox:tuple) -> bool:
+    """
+    判断PDF对象是否和表格区域重叠
+    此函数返回Bool ：是否重叠的情况
+    """
+
+    if not all (key in obj for key in ("x0","x1","top","bottom")):
+        return False
+    
+    obj_x0 = obj["x0"]
+    obj_x1 = obj["x1"]
+    obj_top = obj["top"]
+    obj_bottom = obj["bottom"]
+
+    bbox_x0 = bbox[0]
+    bbox_top = bbox[1]
+    bbox_x1 = bbox[2]
+    bbox_bottom = bbox[3]
+
+    is_left = obj_x1 <= bbox_x0
+    is_right = obj_x0 >= bbox_x1
+    is_above = obj_bottom <= bbox_top
+    is_below = obj_top >= bbox_bottom
+
+    is_not_overlap = is_left or is_right or is_above or is_below
+    return not is_not_overlap
+
+def _extract_text_outside_tables(page,table_bboxes:list[tuple]) ->str | None:
+    """
+    只提取表格区域之外的正文。
+    """
+    if not table_bboxes:
+        return page.extract_text()
+    
+    filtered_page = page.filter(
+        lambda obj:not any(
+            _overlaps_bbox(obj,bbox) for bbox in table_bboxes
+        )
+    )
+
+    return filtered_page.extract_text()
 
 def _parse_ocr(file_path: str) -> dict:
     """
