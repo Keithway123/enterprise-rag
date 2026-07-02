@@ -23,6 +23,29 @@ from app.parsers.pdf_parser import parse_pdf
 from app.chunking import chunk_text, chunk_table
 from app.embedding import get_embedding
 from app.core.milvus_client import connect_milvus, COLLECTION_NAME
+from pathlib import Path
+from app.parsers.word_parser import parse_word
+from app.parsers.web_parser import parse_web
+ 
+ 
+def parse_document(file_path: str, parse_mode: str | None = None) -> dict:
+    """
+    根据文件类型选择 parser。PDF 需要 mode，Word 默认解析全部结构。
+    """
+    suffix = Path(file_path).suffix.lower()
+
+    if suffix == ".pdf":
+        if parse_mode is None:
+            raise ValueError("PDF 必须指定 parse_mode: text/table/ocr")
+        return parse_pdf(file_path, mode=parse_mode)
+
+    if suffix == ".docx":
+        return parse_word(file_path)
+
+    if suffix in [".html", ".htm"]:
+        return parse_web(file_path)
+
+    raise ValueError(f"不支持的文件类型: {suffix}")
  
  
 def get_file_hash(file_path: str) -> str:
@@ -45,7 +68,7 @@ def is_already_ingested(client, file_hash: str) -> bool:
  
 def ingest_document(
     file_path: str,
-    parse_mode: str,
+    parse_mode: str | None = None,
     chunk_size: int = 500,
     overlap: int = 50,
     rows_per_chunk: int = 50,
@@ -55,7 +78,7 @@ def ingest_document(
  
     Args:
         file_path: 文档路径
-        parse_mode: 解析模式，"text" / "table" / "ocr"
+        parse_mode: PDF 解析模式，"text" / "table" / "ocr"；Word 不需要传
         chunk_size: 普通文字的分块大小（按字数）
         overlap: 普通文字分块的重叠大小
         rows_per_chunk: 表格的分块大小（按行数）
@@ -69,7 +92,8 @@ def ingest_document(
         return
  
     # 第一步：解析
-    parsed = parse_pdf(file_path, mode=parse_mode)
+    parsed = parse_document(file_path, parse_mode=parse_mode)
+    document_mode = parsed["mode"]
  
     # 第二步 + 第三步：分块、向量化，组装成最终要写入的数据
     data_to_insert = []
@@ -87,7 +111,7 @@ def ingest_document(
                     "text": chunk,
                     "source": file_path,
                     "page": page_number,
-                    "mode": parse_mode,
+                    "mode": document_mode,
                     "file_hash": file_hash,
                 })
  
@@ -106,7 +130,7 @@ def ingest_document(
                     "table_index":table_index,
                     "table_chunk_index":table_chunk_index,
                     "table_data_json":table_data_json,
-                    "mode": parse_mode,
+                    "mode": document_mode,
                     "file_hash": file_hash,
                 })
  
