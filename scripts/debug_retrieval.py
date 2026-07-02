@@ -29,6 +29,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="打印一次可解释 RAG 检索结果")
     parser.add_argument("query", help="用户问题")
     parser.add_argument("--top-k", type=int, default=5, help="Milvus 召回数量")
+    parser.add_argument("--show-query", action="store_true", help="是否单独打印用户问题")
+
     args = parser.parse_args()
 
     try:
@@ -38,7 +40,6 @@ def main() -> None:
         print("如果刚启动容器，请等几秒再重试这个脚本。")
         raise SystemExit(1)
 
-    parser.add_argument("--show-query", action="store_true", help="是否单独打印用户问题")
 
     if args.show_query:
         print("=== 用户问题 ===")
