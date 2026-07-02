@@ -100,7 +100,7 @@ def build_prompt(text_results:list[dict],table_results: list[dict],query:str)-> 
         markdown = format_table_as_markdown(sorted_chunks)
         source = sorted_chunks[0].get("source", "unknown")
         page = sorted_chunks[0].get("page", "unknown")
-        labeled_markdown = f"（来自 {source} 第{page}页，表格）：\n{markdown}"
+        labeled_markdown = f"{format_source_label(source,page,'表格')}\n{markdown}"
         table_markdown_list.append(labeled_markdown)
     #text
     text_with_source_list = []
@@ -108,7 +108,7 @@ def build_prompt(text_results:list[dict],table_results: list[dict],query:str)-> 
     for record in text_results:
         source = record.get("source", "unknown")
         page = record.get("page", "unknown")
-        labeled_text = f"（来自 {source} 第{page}页，文本）：\n{record.get('text', '')}"
+        labeled_text = f"{format_source_label(source, page, '文本')}\n{record.get('text', '')}"
         text_with_source_list.append(labeled_text)
     
     all_materials = []
@@ -174,7 +174,14 @@ def build_explainable_prompt(query: str, top_k: int = 5) -> dict:
         "prompt": prompt,
     }
 
-
+def format_source_label(source:str, page, content_type:str) -> str:
+    """
+    有页码就显示页码，没页码不显示None页
+    """
+    if page is None:
+        return f"（来自 {source}，{content_type}）："   
+     
+    return f"（来自 {source} 第{page}页，{content_type}）："
 
 if __name__ =="__main__":
     results = search_similar_chunks("张三在什么部门？",top_k=3)

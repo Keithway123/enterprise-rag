@@ -1,3 +1,10 @@
+"""
+Deprecated: PDF-only import script.
+
+保留原因：早期学习阶段使用过。
+新入口：scripts.import_document，支持 PDF / Word / Web。
+"""
+
 import argparse
 import sys
 from pathlib import Path
